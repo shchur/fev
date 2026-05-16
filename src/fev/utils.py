@@ -399,7 +399,9 @@ def _filter_by_length(
         return dataset, cutoff_indices, lengths
 
     valid_indices = np.nonzero(valid_mask)[0]
-    filtered_dataset = dataset.select(valid_indices).flatten_indices()
+    table = dataset.data.table.take(valid_indices)
+    filtered_dataset = datasets.Dataset(table, fingerprint=datasets.fingerprint.generate_random_fingerprint())
+    filtered_dataset.set_format(dataset.format["type"])
     return filtered_dataset, cutoff_indices[valid_mask], lengths[valid_mask]
 
 

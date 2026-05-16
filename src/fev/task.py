@@ -686,7 +686,10 @@ class Task:
         # Ensure that IDs are sorted alphabetically for consistent ordering
         if ds.features[self.id_column].dtype != "string":
             ds = ds.cast_column(self.id_column, datasets.Value("string"))
-        ds = ds.sort(self.id_column)
+        table = ds.data.table
+        sort_indices = pc.sort_indices(table, sort_keys=[(self.id_column, "ascending")])
+        ds = datasets.Dataset(table.take(sort_indices), fingerprint=datasets.fingerprint.generate_random_fingerprint())
+        ds.set_format("numpy")
         self._freq = pd.infer_freq(ds[0][self.timestamp_column])
         if self._freq is None:
             raise ValueError("Dataset contains irregular timestamps")
